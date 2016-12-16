@@ -40,11 +40,13 @@ exports.subscribe$ = (service, method, args...) ->
 # Handle published events
 
 socket.on 'event', (service, type, event) ->
-    if cbs = subscriptions[service][type]
+    if cbs = subscriptions[service]?[type]
         try
             cbs.map (cb) -> cb event
         catch e
-            console.error "Died while handling response...", e.stack
+            console.error "[socket.on event] #{service} #{type} Error:", e.stack
+    else
+        console.log "[socket.on event] No such subscription #{service} #{type}"
 
 # Resubscribe when reconnecting
 
