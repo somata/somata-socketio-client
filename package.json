@@ -1,0 +1,15 @@
+{
+    "name": "somata-socketio-client",
+    "version": "0.0.1",
+    "repository": {
+        "type": "git",
+        "url": "http://github.com/somata/somata-socketio-client.git"
+    },
+    "main": "lib/index.js",
+    "scripts": {
+        "build": "cjsx --bare -o lib -c src"
+    },
+    "dependencies": {
+        "kefir": "3.2.x"
+    }
+}
