@@ -30,6 +30,9 @@ exports.subscribe = (service, type, cb) ->
     subscriptions[service][type].push cb
     socket.emit 'subscribe', service, type
 
+exports.unsubscribe = (service, type) ->
+    socket.emit 'unsubscribe', service, type
+
 # Kefir version
 
 exports.subscribe$ = (service, method, args...) ->
