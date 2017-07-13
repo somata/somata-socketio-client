@@ -2,6 +2,7 @@ Kefir = require 'kefir'
 
 # Connect to the Socket.io server
 
+# socket = io.connect(socketio_base_url or null)
 socket = io.connect()
 exports.socket = socket
 
@@ -53,31 +54,45 @@ socket.on 'event', (service, type, event) ->
 
 # Resubscribe when reconnecting
 
-connected = false
-authenticated = false
 first_connect = true
 
-didConnect = ->
-    connected = true
-    console.log '[didConnect] Connected...'
-    socket.emit 'hello', token
-
-didAuthenticate = (cb) -> (user) ->
-    console.log '[didAuthenticate] Authenticated as', user
-    # Prevent re-connecting on initial load
-    if first_connect
-        first_connect = false
-        cb(null, user)
-    else
-        reSubscribe()
-
 reSubscribe = ->
+    # Prevent re-connecting on initial load
+    return if first_connect
     # Re-connect known subscriptions
     for service, types of subscriptions
         for type, fns of types
             socket.emit 'subscribe', service, type
 
-exports.authenticate = (cb) ->
+# Without auth
+# hello -> hello, subscribes immediately
+# ------------------------------------------------------------------------------
+
+didConnect = ->
+    console.log '[didConnect] Connected...'
+    socket.emit 'hello'
+    reSubscribe()
+    first_connect = false
+
+exports.connect = (cb) ->
     socket.on 'hello', didConnect
+
+# With auth
+# hello -> hello -> welcome(user), subscribes after welcome
+# ------------------------------------------------------------------------------
+
+didConnectAuth = (token) -> ->
+    console.log '[didConnectAuthenticate] Connected...'
+    socket.emit 'hello', token
+
+didAuthenticate = (cb) -> (user) ->
+    console.log '[didAuthenticate] Authenticated as', user
+    if first_connect
+        cb(null, user)
+    reSubscribe()
+    first_connect = false
+
+exports.authenticate = (token, cb) ->
+    socket.on 'hello', didConnectAuth token
     socket.on 'welcome', didAuthenticate cb
 
