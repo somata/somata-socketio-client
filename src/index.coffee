@@ -25,20 +25,20 @@ exports.remote$ = (service, method, args...) ->
 # Subscribe to a service's events
 
 subscriptions = {}
-exports.subscribe = (service, type, cb) ->
+exports.subscribe = (service, type, args..., cb) ->
     subscriptions[service] ||= {}
     subscriptions[service][type] ||= []
     subscriptions[service][type].push cb
-    socket.emit 'subscribe', service, type
+    socket.emit 'subscribe', service, type, args...
 
 exports.unsubscribe = (service, type) ->
     socket.emit 'unsubscribe', service, type
 
 # Kefir version
 
-exports.subscribe$ = (service, method, args...) ->
+exports.subscribe$ = (service, type, args...) ->
     Kefir.stream (emitter) ->
-        exports.subscribe service, method, args..., (result) ->
+        exports.subscribe service, type, args..., (result) ->
             emitter.emit(result)
 
 # Handle published events
